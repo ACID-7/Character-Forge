@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Character Forge ⚡</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Orbitron:wght@700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ROOT & RESET
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0c14;
+  --panel: #111520;
+  --panel2: #161c2e;
+  --border: #252f4a;
+  --text: #eef1fa;
+  --muted: #5a6a8a;
+  --gold: #ffd700;
+  --accent: #ff4655;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* animated starfield */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(100,80,255,0.07) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 70%, rgba(255,70,85,0.06) 0%, transparent 60%);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page { position: relative; z-index: 1; max-width: 1700px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* HEADER */
+header {
+  text-align: center; padding: 36px 20px 20px;
+}
+.hdr-tag { font-size: 11px; letter-spacing: 7px; color: #7c83ff; text-transform: uppercase; margin-bottom: 10px; }
+.hdr-title {
+  font-family: 'Orbitron', sans-serif; font-size: clamp(28px,5vw,58px); font-weight: 900;
+  letter-spacing: 5px; line-height: 1;
+  background: linear-gradient(135deg,#ff4655 0%,#ffaa00 40%,#7c83ff 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hdr-sub { color: var(--muted); font-size: 13px; letter-spacing: 2px; margin-top: 8px; }
+.hdr-line { width: 240px; height: 2px; margin: 18px auto 0; background: linear-gradient(90deg,transparent,#ff4655,#ffaa00,transparent); }
+
+/* UNIVERSE TABS */
+.uni-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 24px 0 28px; }
+.uni-tab {
+  padding: 9px 16px; cursor: pointer;
+  background: var(--panel); border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+  color: var(--muted); transition: all .2s; display: flex; align-items: center; gap: 6px;
+}
+.uni-tab:hover { border-color: var(--tab-col, #7c83ff); color: var(--text); background: var(--panel2); }
+.uni-tab.active {
+  background: color-mix(in srgb, var(--tab-col,#7c83ff) 18%, var(--panel));
+  border-color: var(--tab-col, #7c83ff); color: var(--text);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--tab-col,#7c83ff) 35%, transparent);
+}
+.uni-tab .te { font-size: 18px; }
+
+/* MAIN BODY */
+.main-body { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+@media(max-width:1000px){ .main-body{grid-template-columns:1fr;} }
+
+/* LEFT */
+.left-col { display: flex; flex-direction: column; gap: 20px; }
+
+/* TOP BAR */
+.top-bar { display: flex; gap: 12px; align-items: center; }
+.btn-spin-all {
+  flex:1; padding: 16px; cursor: pointer;
+  background: linear-gradient(135deg, #ff4655 0%, #ff8a00 100%);
+  border: none; border-radius: 10px;
+  font-family:'Orbitron',sans-serif; font-size: 14px; font-weight: 900; letter-spacing: 3px; color: #fff;
+  box-shadow: 0 4px 30px rgba(255,70,85,.35); transition: all .25s;
+}
+.btn-spin-all:hover:not(:disabled){ transform: translateY(-2px); box-shadow: 0 8px 40px rgba(255,70,85,.5); }
+.btn-spin-all:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+.btn-reset {
+  padding: 16px 20px; cursor: pointer;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 10px;
+  font-family:'Nunito',sans-serif; font-size: 13px; font-weight: 800; color: var(--muted);
+  transition: all .2s;
+}
+.btn-reset:hover{ border-color: #ff4655; color: #ff4655; }
+
+.btn-custom {
+  padding: 16px 18px; cursor: pointer;
+  background: var(--panel); border: 1.5px solid #7c83ff; border-radius: 10px;
+  font-family:'Nunito',sans-serif; font-size: 13px; font-weight: 800; color: #7c83ff;
+  transition: all .2s; white-space: nowrap;
+}
+.btn-custom:hover{ background: rgba(124,131,255,.12); box-shadow: 0 0 16px rgba(124,131,255,.3); }
+
+/* WHEEL ATTRS STRIP */
+.attr-strip {
+  display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 10px;
+}
+.attr-chip {
+  padding: 6px 14px; border-radius: 20px; cursor: pointer; border: 1.5px solid transparent;
+  font-size: 12px; font-weight: 800; letter-spacing: .5px; transition: all .2s;
+}
+.attr-chip.active { transform: scale(1.05); }
+
+/* WHEEL SECTION */
+.wheel-section { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+.wheel-title-row {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+}
+.wheel-attr-icon { font-size: 28px; }
+.wheel-attr-name {
+  font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 2px;
+}
+.wheel-attr-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* THE BIG WHEEL */
+.wheel-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.wheel-pointer {
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  width: 0; height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 34px solid #fff;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+.wheel-pointer::after {
+  content: '';
+  position: absolute; top: -34px; left: -10px;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 20px solid rgba(255,255,255,.3);
+}
+
+canvas#mainWheel {
+  border-radius: 50%;
+  display: block;
+  box-shadow: 0 0 60px rgba(0,0,0,.8), 0 0 0 6px rgba(255,255,255,.08);
+  cursor: pointer;
+  transition: box-shadow .3s;
+}
+canvas#mainWheel:hover { box-shadow: 0 0 80px rgba(255,180,0,.25), 0 0 0 6px rgba(255,255,255,.15); }
+
+.spin-center-btn {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle, #1e2230 60%, #111520);
+  border: 3px solid rgba(255,255,255,.15);
+  cursor: pointer; font-family: 'Orbitron', sans-serif;
+  font-size: 13px; font-weight: 900; color: #fff; letter-spacing: 1px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; z-index: 10;
+  box-shadow: 0 0 30px rgba(0,0,0,.6), inset 0 0 20px rgba(0,0,0,.4);
+  transition: all .2s;
+}
+.spin-center-btn:hover { border-color: rgba(255,255,255,.35); transform: translate(-50%,-50%) scale(1.06); }
+.spin-center-btn .spin-icon { font-size: 22px; }
+.spin-center-btn.spinning { animation: centerPulse .6s infinite alternate; }
+@keyframes centerPulse{ from{box-shadow:0 0 30px rgba(255,140,0,.3),inset 0 0 20px rgba(0,0,0,.4);} to{box-shadow:0 0 60px rgba(255,140,0,.6),inset 0 0 20px rgba(0,0,0,.4);} }
+
+/* RESULT TOAST */
+.result-toast {
+  width: 100%; padding: 16px 24px;
+  background: var(--panel2); border: 1.5px solid var(--border); border-radius: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 64px;
+}
+.result-label { font-family:'Orbitron',sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); }
+.result-value {
+  font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800;
+  color: var(--gold); text-shadow: 0 0 20px rgba(255,215,0,.5);
+  transition: all .3s;
+}
+.result-value.pending { color: var(--muted); font-size: 15px; font-weight: 700; font-family: 'Nunito', sans-serif; }
+
+/* ============================================================
+   RIGHT — CHARACTER CARD
+   ============================================================ */
+.char-panel { position: sticky; top: 20px; }
+
+.char-card {
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px;
+  overflow: hidden; position: relative;
+}
+.char-card-topbar {
+  height: 4px;
+  background: linear-gradient(90deg, #ff4655, #ffaa00, #7c83ff);
+}
+
+.char-head { padding: 24px 20px 18px; text-align: center; border-bottom: 1px solid var(--border); }
+.char-avi {
+  width: 96px; height: 96px; margin: 0 auto 14px;
+  border-radius: 50%; border: 3px solid var(--border);
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  font-size: 48px; transition: all .5s;
+}
+.char-avi.lit { border-color: var(--gold); box-shadow: 0 0 40px rgba(255,215,0,.35); animation: aviGlow 2s infinite alternate; }
+.char-avi.done { animation: aviDone 2s infinite alternate; }
+@keyframes aviGlow{ from{box-shadow:0 0 25px rgba(255,215,0,.25);} to{box-shadow:0 0 50px rgba(255,215,0,.55);} }
+@keyframes aviDone{ from{box-shadow:0 0 30px rgba(255,70,85,.4);} to{box-shadow:0 0 60px rgba(124,131,255,.6);} }
+
+.char-name { font-family:'Orbitron',sans-serif; font-size: 15px; font-weight: 900; margin-bottom: 8px; }
+.char-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+}
+
+/* PROGRESS */
+.prog-wrap { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.prog-row { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.prog-lbl { font-family:'Orbitron',sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--muted); }
+.prog-num { font-family:'Orbitron',sans-serif; font-size: 10px; color: #ffaa00; }
+.prog-track { height: 5px; background: var(--border); border-radius: 5px; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; border-radius: 5px; background: linear-gradient(90deg,#ff4655,#ffaa00); transition: width .6s; }
+
+/* COMPLETE RIBBON */
+.complete-ribbon {
+  display: none; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; background: linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,70,85,.1));
+  border-bottom: 1px solid rgba(255,215,0,.25);
+  font-family:'Orbitron',sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--gold);
+  animation: ribPulse 2s infinite alternate;
+}
+.complete-ribbon.show { display: flex; }
+@keyframes ribPulse{ from{opacity:.8;} to{opacity:1;} }
+
+/* STATS */
+.stats-scroll { max-height: 460px; overflow-y: auto; }
+.stats-scroll::-webkit-scrollbar{ width: 4px; }
+.stats-scroll::-webkit-scrollbar-track{ background: var(--bg); }
+.stats-scroll::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 4px; }
+
+.stat-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,.03);
+  transition: background .2s;
+}
+.stat-row:hover{ background: rgba(255,255,255,.025); }
+.stat-row:last-child{ border-bottom: none; }
+.stat-row.active-row { background: rgba(255,170,0,.06); }
+.sk { font-size: 10px; font-family:'Orbitron',sans-serif; letter-spacing: 1px; color: var(--muted); flex-shrink:0; padding-top: 2px; }
+.sv { font-size: 13px; font-weight: 800; text-align: right; max-width: 180px; line-height: 1.3; }
+.sv.pending { color: var(--border); font-size: 11px; font-weight: 700; font-style: italic; }
+.sv.filled { animation: svFill .35s ease; }
+@keyframes svFill{ from{opacity:0;transform:translateX(8px);} to{opacity:1;transform:translateX(0);} }
+
+/* ============================================================
+   CUSTOM WHEEL MODAL
+   ============================================================ */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 1000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-backdrop.open { display: flex; }
+
+.modal {
+  background: var(--panel2); border: 1.5px solid var(--border); border-radius: 20px;
+  width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 80px rgba(0,0,0,.6);
+  animation: modalIn .3s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes modalIn{ from{transform:scale(.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 24px 16px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-family:'Orbitron',sans-serif; font-size: 16px; font-weight: 900; }
+.modal-close {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--panel);
+  border: 1.5px solid var(--border); color: var(--muted); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.modal-close:hover{ border-color: #ff4655; color: #ff4655; }
+
+.modal-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+.field-label { font-family:'Orbitron',sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); margin-bottom: 8px; }
+
+.text-inp {
+  width: 100%; padding: 12px 16px;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 10px;
+  color: var(--text); font-family:'Nunito',sans-serif; font-size: 14px; font-weight: 700;
+  outline: none; transition: border-color .2s;
+}
+.text-inp:focus{ border-color: #7c83ff; }
+.text-inp::placeholder{ color: var(--muted); }
+
+.items-list { display: flex; flex-direction: column; gap: 8px; }
+.item-row { display: flex; gap: 8px; align-items: center; }
+.item-inp {
+  flex:1; padding: 10px 14px;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family:'Nunito',sans-serif; font-size: 13px; font-weight: 700;
+  outline: none; transition: border-color .2s;
+}
+.item-inp:focus{ border-color: #7c83ff; }
+.item-inp::placeholder{ color: var(--muted); }
+
+.btn-del-item {
+  width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+  background: rgba(255,70,85,.1); border: 1.5px solid rgba(255,70,85,.3);
+  color: #ff4655; font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: all .2s; flex-shrink: 0;
+}
+.btn-del-item:hover{ background: rgba(255,70,85,.25); }
+
+.btn-add-item {
+  padding: 10px; width: 100%; cursor: pointer;
+  background: rgba(124,131,255,.1); border: 1.5px dashed rgba(124,131,255,.4); border-radius: 8px;
+  color: #7c83ff; font-family:'Nunito',sans-serif; font-size: 13px; font-weight: 800;
+  transition: all .2s;
+}
+.btn-add-item:hover{ background: rgba(124,131,255,.2); }
+
+.modal-foot {
+  display: flex; gap: 10px; padding: 16px 24px 24px;
+}
+.btn-launch {
+  flex:1; padding: 14px; cursor: pointer;
+  background: linear-gradient(135deg,#7c83ff,#a855f7);
+  border: none; border-radius: 10px;
+  font-family:'Orbitron',sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 2px; color: #fff;
+  transition: all .25s; box-shadow: 0 4px 24px rgba(124,131,255,.3);
+}
+.btn-launch:hover{ transform: translateY(-2px); box-shadow: 0 8px 36px rgba(124,131,255,.5); }
+.btn-cancel {
+  padding: 14px 20px; cursor: pointer;
+  background: var(--panel); border: 1.5px solid var(--border); border-radius: 10px;
+  color: var(--muted); font-family:'Nunito',sans-serif; font-size: 13px; font-weight: 800;
+  transition: all .2s;
+}
+.btn-cancel:hover{ border-color: #ff4655; color: #ff4655; }
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+.confetti {
+  position: fixed; top: -10px; pointer-events: none; z-index: 9999;
+  border-radius: 2px; animation: cfall linear forwards;
+}
+.confetti.circle{ border-radius: 50%; }
+@keyframes cfall{ to{ transform: translateY(105vh) rotate(720deg); opacity:0; } }
+
+/* ============================================================
+   MISC
+   ============================================================ */
+.section-title {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 4px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- MODAL: Custom Wheel -->
+<div class="modal-backdrop" id="customModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🎨 Custom Wheel Builder</div>
+      <button class="modal-close" onclick="closeCustomModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="field-label">Wheel Name / Category</div>
+        <input class="text-inp" id="customName" placeholder="e.g. My Favourite Moves..." />
+      </div>
+      <div>
+        <div class="field-label">Wheel Items (Add as many as you want)</div>
+        <div class="items-list" id="itemsList"></div>
+        <button class="btn-add-item" onclick="addItemField()">＋ Add Item</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeCustomModal()">Cancel</button>
+      <button class="btn-launch" onclick="launchCustomWheel()">🎡 Launch Wheel!</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="hdr-tag">⚡ Character Destiny Forge ⚡</div>
+    <h1 class="hdr-title">ANIME WHEEL<br>SPINNER</h1>
+    <p class="hdr-sub">Spin to forge your ultimate character</p>
+    <div class="hdr-line"></div>
+  </header>
+
+  <!-- UNIVERSE TABS -->
+  <div class="uni-bar" id="uniBar"></div>
+
+  <!-- MAIN -->
+  <div class="main-body">
+
+    <!-- LEFT -->
+    <div class="left-col">
+
+      <!-- TOP ACTIONS -->
+      <div class="top-bar">
+        <button class="btn-spin-all" id="spinAllBtn" onclick="spinAllAttrs()">⚡ SPIN ALL ATTRIBUTES</button>
+        <button class="btn-reset" onclick="resetAll()">↺ Reset</button>
+        <button class="btn-custom" onclick="openCustomModal()">✏️ Custom Wheel</button>
+      </div>
+
+      <!-- ATTR CHIPS -->
+      <div>
+        <div class="section-title">Select Attribute to Spin</div>
+        <div class="attr-strip" id="attrStrip"></div>
+      </div>
+
+      <!-- WHEEL -->
+      <div class="wheel-section">
+        <div class="wheel-title-row">
+          <span class="wheel-attr-icon" id="wAttrIcon">🎯</span>
+          <div>
+            <div class="wheel-attr-name" id="wAttrName">GENDER</div>
+            <div class="wheel-attr-sub" id="wAttrSub">Click an attribute chip above or spin!</div>
+          </div>
+        </div>
+
+        <div class="wheel-wrap" id="wheelWrap">
+          <div class="wheel-pointer"></div>
+          <canvas id="mainWheel" width="520" height="520" onclick="spinCurrentWheel()"></canvas>
+          <button class="spin-center-btn" id="centerBtn" onclick="spinCurrentWheel()">
+            <span class="spin-icon">🎡</span>
+            <span>SPIN</span>
+          </button>
+        </div>
+
+        <!-- RESULT -->
+        <div class="result-toast">
+          <div>
+            <div class="result-label">RESULT</div>
+            <div class="result-value pending" id="resultVal">Spin the wheel to reveal!</div>
+          </div>
+          <div id="resultEmoji" style="font-size:36px"></div>
+        </div>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT -->
+    <div class="char-panel">
+      <div class="char-card">
+        <div class="char-card-topbar"></div>
+        <div class="char-head">
+          <div class="char-avi" id="charAvi">❓</div>
+          <div class="char-name" id="charName">Unknown Character</div>
+          <span class="char-badge" id="charBadge">SELECT UNIVERSE</span>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-row">
+            <span class="prog-lbl">ATTRIBUTES SPUN</span>
+            <span class="prog-num" id="progNum">0 / 0</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        </div>
+        <div class="complete-ribbon" id="completeRibbon">✦ CHARACTER COMPLETE ✦</div>
+        <div class="stats-scroll"><div id="statsList"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /main-body -->
+
+</div><!-- /page -->
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const UNIVERSES = {
+  naruto: {
+    name:"Naruto", emoji:"🍥", color:"#FF6B35", color2:"#FFD700",
+    tagline:"Believe it!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",          options:["Male","Female","Non-Binary","Androgynous","Unknown"] },
+      { id:"village",  icon:"🏘",  name:"Hidden Village",  options:["Leaf (Konoha)","Sand (Suna)","Mist (Kiri)","Cloud (Kumo)","Stone (Iwa)","Sound (Oto)","Rain (Ame)","Grass (Kusa)","Waterfall (Taki)","Star (Hoshi)","No Village"] },
+      { id:"clan",     icon:"⛩",  name:"Clan",             options:["Uchiha","Uzumaki","Hyuga","Nara","Senju","Hatake","Sarutobi","Kaguya","Akimichi","Yamanaka","Inuzuka","Aburame","No Clan"] },
+      { id:"rank",     icon:"🎖",  name:"Ninja Rank",       options:["Academy Student","Genin","Chunin","Special Jonin","Jonin","ANBU","ANBU Captain","S-Rank","Kage","Sannin","Sage","Akatsuki"] },
+      { id:"eyes",     icon:"👁",  name:"Dojutsu Eyes",     options:["Sharingan","Mangekyō Sharingan","Eternal Mangekyō","Rinnegan","Byakugan","Tenseigan","Jougan","Six-Tomoe Rinnegan","No Dojutsu","Blind Sensor"] },
+      { id:"nature",   icon:"🌪",  name:"Chakra Nature",    options:["Fire (Katon)","Water (Suiton)","Earth (Doton)","Wind (Futon)","Lightning (Raiton)","Wood (Mokuton)","Ice (Hyoton)","Lava (Yoton)","Storm (Ranton)","Dust (Jinton)","All Five Natures"] },
+      { id:"summon",   icon:"📜",  name:"Summoning",        options:["Toads","Snakes","Slugs","Dogs","Eagles","Cats","Wolves","Bears","Monkeys","Sharks","No Contract"] },
+      { id:"sensei",   icon:"🧑‍🏫", name:"Sensei",           options:["Kakashi","Jiraiya","Tsunade","Orochimaru","Minato","Hiruzen","Might Guy","Asuma","Kurenai","Yamato","Self-Taught"] },
+      { id:"bijuu",    icon:"🦊",  name:"Tailed Beast",     options:["Kurama (Nine-Tails)","Shukaku (1-Tail)","Matatabi (2-Tails)","Isobu (3-Tails)","Son Goku (4-Tails)","Kokuo (5-Tails)","Saiken (6-Tails)","Chomei (7-Tails)","Gyuki (8-Tails)","No Bijuu"] },
+      { id:"spec",     icon:"⚔",  name:"Specialty",        options:["Taijutsu","Ninjutsu","Genjutsu","Medical Nin","Fuinjutsu","Senjutsu","Kenjutsu","Puppetry","Space-Time Jutsu","All-Rounder"] },
+      { id:"mode",     icon:"✨",  name:"Special Mode",     options:["Sage Mode (Toads)","Sage Mode (Snakes)","Six Paths Sage Mode","Kurama Chakra Mode","Susanoo","Eight Gates","Baryon Mode","No Special Mode"] },
+      { id:"goal",     icon:"🌟",  name:"Life Goal",        options:["Become Hokage","Avenge Clan","Protect All Friends","Surpass Rival","Find Peace","Rebuild Village","Become Strongest","Secret Mission","World Domination"] }
+    ]
+  },
+  onepiece: {
+    name:"One Piece", emoji:"🏴‍☠️", color:"#00C9FF", color2:"#F4A261",
+    tagline:"Set sail!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Androgynous","Zoomorphic"] },
+      { id:"role",     icon:"⚓",  name:"Crew Role",        options:["Captain","First Mate","Navigator","Cook","Doctor","Swordsman","Sniper","Shipwright","Archaeologist","Musician","Spy","Tactician"] },
+      { id:"fruit",    icon:"🍎",  name:"Devil Fruit",      options:["Gomu Gomu (Rubber)","Mera Mera (Fire)","Hie Hie (Ice)","Gura Gura (Tremor)","Ope Ope (Op-Op)","Yami Yami (Dark)","Magu Magu (Magma)","Pika Pika (Light)","Suna Suna (Sand)","Goro Goro (Lightning)","Zoan: Dragon","Zoan: Phoenix","Zoan: Dinosaur","Ito Ito (String)","No Devil Fruit"] },
+      { id:"haki",     icon:"💜",  name:"Haki Type",        options:["Observation Haki","Armament Haki","Conqueror's Haki","Future Sight","Advanced Armament","Advanced Conqueror's","Supreme King Color","All Three Types","No Haki"] },
+      { id:"sea",      icon:"🌊",  name:"Origin Sea",       options:["East Blue","West Blue","North Blue","South Blue","Grand Line","New World","Skypiea","Fish-Man Island","Wano Country","Dressrosa","Elbaf"] },
+      { id:"faction",  icon:"🚩",  name:"Faction",          options:["Straw Hat Pirates","Red Hair Pirates","Whitebeard Pirates","Big Mom Pirates","Beasts Pirates","Blackbeard Pirates","Marine HQ","Revolutionary Army","Cipher Pol","World Government","Independent Pirate"] },
+      { id:"bounty",   icon:"💰",  name:"Bounty",           options:["Under 100M","100M–500M","500M–1B","1B–3B","3B–5B","Emperor Tier (5B+)","Pirate King Level","No Bounty (Marine)"] },
+      { id:"weapon",   icon:"🗡",  name:"Weapon Style",     options:["One Sword","Two Swords","Three Swords (Zoro)","Pistol / Guns","Bo Staff","Clima-Tact","Trident","Knives","Bazooka","Fists Only","Devil Fruit as Weapon"] },
+      { id:"fighting", icon:"🥊",  name:"Fighting Style",   options:["Pure Swordplay","Devil Fruit Combat","Rokushiki (CP Arts)","Sniper / Long Range","Brawling (Raw Power)","Speed Assassin","Logia Elemental","Tactical Support","Zoan Monster Form"] },
+      { id:"dream",    icon:"✨",  name:"Dream",            options:["Find the One Piece","Pirate King","Best Swordsman","Map the World","All Poneglyphs","Cure All Diseases","Best Song Ever","Reach the All Blue","Overthrow Govt","Freedom Above All"] }
+    ]
+  },
+  sololeveling: {
+    name:"Solo Leveling", emoji:"⚔️", color:"#9B59B6", color2:"#E63946",
+    tagline:"Arise!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Androgynous"] },
+      { id:"rank",     icon:"📊",  name:"Hunter Rank",      options:["E-Rank","D-Rank","C-Rank","B-Rank","A-Rank","S-Rank","National Level","World Top 10","Monarch Level","Shadow Monarch"] },
+      { id:"class",    icon:"🧙",  name:"Job Class",        options:["Fighter","Mage","Healer","Assassin","Tank","Ranger","Necromancer","Berserker","Summoner","Illusionist","Dual-Class"] },
+      { id:"power",    icon:"💥",  name:"Special Power",    options:["Shadow Army","Ruler's Authority","Dominator's Touch","Dragon Slayer","Monarch Powers","The System","Beast Rage","Iron Body","Speed of Light","Plague Curse","Ice Control","Architect's Gift"] },
+      { id:"nation",   icon:"🌍",  name:"Nation",           options:["South Korea","Japan","USA","China","Europe","Russia","Middle East","Australia","Canada","Brazil","India"] },
+      { id:"guild",    icon:"🏰",  name:"Guild",            options:["Ahjin Guild","Hunters Guild","Fame Guild","White Tiger Guild","Surveillance","Reaper Guild (Japan)","Solo Hunter","Monarchs Alliance","Black Sword (USA)","Scavenger Guild"] },
+      { id:"weapon",   icon:"🗡",  name:"Weapon",           options:["Demon King's Longsword","Demon Dagger (Twin)","Orb of Avarice","Baruka's Dagger","Knight Killer","Shadow Spear","Magic Tome","Poison Claws","Ice Lance","Thunder Gauntlets","Bare Hands"] },
+      { id:"shadow",   icon:"👥",  name:"Strongest Shadow", options:["Igris — Knight","Beru — Marshal","Iron — Soldier","Tank — Golem","Tusk — Warrior","Greed — Marshal","Kaisel — Dragon","No Shadows","Ancient Dragon","Monarch's Army"] },
+      { id:"dungeon",  icon:"🏯",  name:"Dungeon Spec",     options:["Red Gate Expert","Double Dungeon","Ant Queen Raid","Dragon's Lair","Boss Hunter","Solo Clearer","Rank-Up Quest","Gate Breaker","Double Awakened","System User"] },
+      { id:"persona",  icon:"🧠",  name:"Personality",      options:["Cold & Calculating","Reckless Grinder","Family Protector","Overpowered Indifferent","Power Hungry","Trauma-Forged Will","Tactical Genius","Silent Deadly","Arrogant Elite","Humble Underdog"] }
+    ]
+  },
+  genshin: {
+    name:"Genshin Impact", emoji:"🌟", color:"#F4C430", color2:"#A855F7",
+    tagline:"A world of adventure!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Ambiguous"] },
+      { id:"rarity",   icon:"⭐",  name:"Rarity",           options:["5★ Limited Banner","5★ Standard Banner","4★ Event Featured","4★ Standard Pool","Flagship 5★ (New Meta)","Collab 5★","Archon 5★"] },
+      { id:"element",  icon:"💎",  name:"Element / Vision", options:["Pyro 🔥","Hydro 💧","Cryo ❄️","Electro ⚡","Anemo 🌪","Geo 🪨","Dendro 🌿","No Vision (Void)"] },
+      { id:"weapon",   icon:"⚔",  name:"Weapon Type",      options:["Sword","Claymore","Polearm","Bow","Catalyst","5★ Signature Weapon","4★ Craftable","F2P Weapon","Catch (F2P Polearm)"] },
+      { id:"nation",   icon:"🏰",  name:"Nation",           options:["Mondstadt","Liyue","Inazuma","Sumeru","Fontaine","Natlan","Snezhnaya","Khaenri'ah (Fallen)","Unknown / Traveler","Celestia","Abyss Order","Enkanomiya"] },
+      { id:"archon",   icon:"🌌",  name:"Archon Allegiance",options:["Barbatos (Anemo)","Rex Lapis (Geo)","Raiden Shogun (Electro)","Nahida (Dendro)","Furina (Hydro)","Murata (Pyro)","Tsaritsa (Cryo)","No Allegiance","The Abyss","Dragon God Lineage"] },
+      { id:"role",     icon:"🎯",  name:"Team Role",        options:["On-Field DPS","Sub-DPS Off-Field","Healer / Sustain","Shield Tank","Burst Nuke","Buffer / Debuffer","Reaction Driver","Freeze Control","Hypercarry","Exploration Utility"] },
+      { id:"constel",  icon:"✨",  name:"Constellation",    options:["C0 Base Kit","C1 Minor QoL","C2 Noticeable","C4 Utility Unlock","C6 Fully Broken","F2P C0 Only","Whale C6 All","Story Unlock"] },
+      { id:"bg",       icon:"📖",  name:"Background",       options:["Adeptus / Ancient","Fatui Harbinger","Traveler Companion","God of War Descent","Akademiya Scholar","Orphan w/ Vision","Merchant","Resistance Fighter","Former Archon","Abyss Creature","Knight / Guardian","Theater Performer"] },
+      { id:"team",     icon:"👥",  name:"Best Teammate",    options:["Bennett (Buff God)","Xingqiu (Sub-DPS Hydro)","Raiden (Battery ER)","Zhongli (Shield)","Kazuha (Swirl)","Fischl (Oz)","Yelan (Hydro)","Nahida (Spread)","Furina (Fontaine)","Navia (Geo DPS)","Self-Built Solo"] }
+    ]
+  },
+  valorant: {
+    name:"Valorant", emoji:"🎯", color:"#FF4655", color2:"#ECE8E1",
+    tagline:"Radiant. Reckless. Relentless.",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Unknown / Masked"] },
+      { id:"role",     icon:"🔰",  name:"Agent Class",      options:["Duelist","Initiator","Controller","Sentinel","Hybrid Duelist-Initiator","Hybrid Controller-Sentinel"] },
+      { id:"power1",   icon:"1️⃣",  name:"Basic Ability (C)",options:["Flash","Smoke","Stun / Slow","Molotov","Recon Dart","Tripwire","Heal Orb","Speed Boost","Wall / Barrier","Decoy","Footstep Tracker","Clone"] },
+      { id:"power2",   icon:"2️⃣",  name:"Skill Ability (Q)",options:["Blind Flash","AOE Slow","Gravity Well","Tether / Bind","Knife Swarm","Poison Cloud","Lightning Cage","Nanoswarm","Orbital Strike (Mini)","Paranoia Smoke","Thermal Field","Seismic Blast"] },
+      { id:"power3",   icon:"3️⃣",  name:"Signature (E)",    options:["Drift / Slide","Recon Bolt","Tailwind (Dash)","Dark Cover (Smoke)","Owl Drone","Prowler","Tour De Force","Trapwire","Dismiss (Fade)","Regrowth Heal","Passive Regen","Spy Cam"] },
+      { id:"ult",      icon:"🔴",  name:"Ultimate",         options:["Blademail Storm","Entropic Fragment","Showstopper (Rocket)","Orbital Strike","Contract Kill","Spike Seekers","Tour de Force (Sniper)","Lockdown Barrier","Annihilation (Dimension)","Fear (Nightmare)","Pearl (Sound)","Agent X Custom Ult"] },
+      { id:"rank",     icon:"🏆",  name:"Competitive Rank", options:["Iron 1–3","Bronze 1–3","Silver 1–3","Gold 1–3","Platinum 1–3","Diamond 1–3","Ascendant 1–3","Immortal 1–3","Radiant (Top 500)","Unranked (Smurf)","Pro / VCT","World Champion"] },
+      { id:"gun",      icon:"🔫",  name:"Signature Weapon", options:["Vandal (AK)","Phantom (Silenced)","Operator (Sniper)","Odin (LMG)","Outlaw (Dual-Snipe)","Bulldog (Burst)","Guardian (Accurate)","Sheriff (Heavy Pistol)","Marshal (Light Sniper)","Spectre (SMG)","Shorty (Pocket Shotgun)","Knife Only"] },
+      { id:"style",    icon:"🎮",  name:"Playstyle",        options:["Entry Fragger","Support IGL","Lurker","Op-er / AWP","Anchor Defender","Info Scout","Aggressive Flanker","Eco Hero","Post-Plant King","Clutch Machine","Meme Strategist","All-Rounder"] },
+      { id:"map",      icon:"🗺",  name:"Home Map",         options:["Bind (Teleports)","Haven (3-Site)","Split (Vertical)","Ascent (Mid Control)","Icebox (Close Quarters)","Breeze (Long Angles)","Fracture (Split Attack)","Pearl (Underwater)","Lotus (Ancient Temple)","Sunset (Urban)","Abyss (No Floor)"] }
+    ]
+  },
+  dragonball: {
+    name:"Dragon Ball", emoji:"🔮", color:"#FF8C00", color2:"#FFD700",
+    tagline:"Push beyond your limits!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Fused Being","Genderless Android"] },
+      { id:"race",     icon:"🌐",  name:"Race",             options:["Pure Saiyan","Half-Saiyan","1/4 Saiyan","Human (Earthling)","Namekian","Android / Cyborg","Bio-Android","Majin","Frost Demon","Angel","God of Destruction","Supreme Kai","Demon Realm Being","Dragon Clan"] },
+      { id:"form",     icon:"💥",  name:"Transformation",  options:["Base Power","Great Ape (Oozaru)","False Super Saiyan","Super Saiyan 1","Super Saiyan 2","Super Saiyan 3","Super Saiyan 4 (GT)","Super Saiyan God","Super Saiyan Blue","Super Saiyan Rose","Legendary SS","Ultra Instinct Sign","Ultra Instinct Mastered","True Ultra Instinct","Beast Form (Gohan)","Orange Piccolo","Ultra Ego"] },
+      { id:"move1",    icon:"1️⃣",  name:"Basic Attack",     options:["Ki Blast Barrage","Rush Attack","Tail Whip (Saiyan)","Piccolo Arm Extend","Warp Strike","Explosive Wave","Kaioken Rush","Death Beam (Rapid)","Power Drain Touch","Finger Beam","Saiyan Elbow","Kaio-ken × Rush"] },
+      { id:"move2",    icon:"2️⃣",  name:"Special Move",     options:["Kamehameha","Galick Gun","Special Beam Cannon","Destructo Disc","Final Flash","Death Ball","Big Bang Attack","Dragon Fist","Hakai (Erase)","Mafuba (Seal)","Shining Slash","Infinity Break"] },
+      { id:"move3",    icon:"3️⃣",  name:"Super Attack",     options:["Warp Kamehameha","Final Explosion","Legendary Blaster","God Kamehameha","Ultra Combo","Energy of Destruction","Spirit Bomb","Instant Kamehameha","Super Dragon Fist","Limitbreaker Kamehameha","Absolute Zero","God Bind"] },
+      { id:"ki",       icon:"✨",  name:"Ki Aura Color",    options:["Gold (SSJ)","Blue (God Ki)","Red (Rose)","White (UI)","Green (Potential)","Purple (Ultra Ego)","Orange (Godly)","Black (Dark Ki)","Silver (Angel)","Rainbow (Limit-Break)","Crimson (Legendary)","Void Black"] },
+      { id:"faction",  icon:"🚩",  name:"Faction",          options:["Z Warriors","Frieza Force","Red Ribbon Army","Ginyu Force","Universe 6","Universe 7","Gods of Destruction","Time Patrol","Demon Realm","Pure Evil","Galactic Patrol","Dragon Team OG"] },
+      { id:"mentor",   icon:"🧑‍🏫", name:"Training Mentor",  options:["Master Roshi","King Kai (North)","Whis (Angel)","Beerus (Destruction)","Piccolo","Vegeta","Self-Trained (Hyperbolic Time Chamber)","Future Trunks","Grand Zeno","Supreme Kai","No Mentor (Raw Talent)"] },
+      { id:"era",      icon:"📊",  name:"Power Era",        options:["Raditz Saga","Saiyan Saga (Nappa)","Namek / Frieza Saga","Android / Cell Saga","Majin Buu Saga","Battle of Gods","Tournament of Destroyers","Tournament of Power","Granolah Arc","Dragon Ball GT","Heroes (God-God)","Multiverse God Tier"] }
+    ]
+  },
+  aot: {
+    name:"Attack on Titan", emoji:"⚡", color:"#C0392B", color2:"#B8860B",
+    tagline:"Fight on behalf of those who cannot.",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Androgynous"] },
+      { id:"regiment", icon:"⚔",  name:"Regiment",         options:["Survey Corps","Garrison Regiment","Military Police","Marleyan Warriors","Yeagerists","Mid-East Allied","Hizuru Alliance","Civilian","Underground Network","Anti-Marleyan Volunteers"] },
+      { id:"titan",    icon:"🦾",  name:"Titan Power",      options:["Attack Titan","Founding Titan","Armored Titan","Colossal Titan","Female Titan","Beast Titan","Jaw Titan","Cart Titan","War Hammer Titan","Coordinate (Special)","Pure Titan","No Titan"] },
+      { id:"skill",    icon:"🗡",  name:"Combat Skill",     options:["ODM Gear Expert","Thunder Spear Specialist","Titan Slaying","Strategic Genius","Infiltration Agent","Hardening Specialist","Titan Form Combat","Political Maneuvering","Anti-Personnel ODM","Colossal Force","Wall Breach Tactics"] },
+      { id:"origin",   icon:"🌍",  name:"Origin",           options:["Eldian (Paradis)","Eldian (Marley)","Marleyan Pure","Hizuru (East Sea)","Mid-East Nations","Unclear Bloodline","Founding Titan Lineage","Underground District","Wall Maria Born","Wall Rose Born","Wall Sina Nobility"] },
+      { id:"gear",     icon:"⚙",  name:"Equipment",        options:["Standard ODM","Anti-Personnel ODM","Thunder Spears + ODM","Hardened Armor","No Gear (Titan)","Custom Modified ODM","Beast Titan Throws","Cart Artillery","War Hammer Crystal","Rogue Pure Titan"] },
+      { id:"rank",     icon:"🎖",  name:"Military Rank",    options:["Trainee","Top 10 Graduate","Scout Private","Veteran Scout","Squad Leader","Section Commander","Special Ops Squad","Commander","Commander-in-Chief","Warchief","Marleyan Warrior"] },
+      { id:"fate",     icon:"💀",  name:"Character Fate",   options:["Dies a Hero","Survives Against Odds","Becomes a Titan","Betrayed by Allies","Falls in Final Battle","Achieves Goal","Lost in Rumbling","Transcends Mortality","Trapped in Paths","Escaped the Island"] },
+      { id:"motive",   icon:"🔥",  name:"Motivation",       options:["Freedom Above All","Protect Humanity","Avenge Family","See the Outside World","Restore Eldia's Honor","Eliminate All Titans","Serve the King","Protect One Person","Erase Discrimination","Survival at Any Cost"] }
+    ]
+  },
+  demonslayer: {
+    name:"Demon Slayer", emoji:"🌊", color:"#00A8CC", color2:"#E63946",
+    tagline:"A blade forged by grief.",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Androgynous"] },
+      { id:"rank",     icon:"🎖",  name:"Corps Rank",       options:["Mizunoto (Lowest)","Mizunoe","Kanoto","Kanoe","Tsuchinoto","Tsuchinoe","Hinoto","Hinoe","Kinoto","Hashira / Pillar","Upper Moon (Enemy)","Lower Moon (Enemy)"] },
+      { id:"breath",   icon:"💨",  name:"Breathing Style",  options:["Water Breathing","Flame Breathing","Thunder Breathing","Wind Breathing","Stone Breathing","Flower / Insect Breathing","Sound Breathing","Love Breathing","Serpent Breathing","Beast Breathing","Moon Breathing","Sun Breathing","Mist Breathing","Custom Style"] },
+      { id:"blade",    icon:"🗡",  name:"Blade Color",      options:["Black (Rare / Unknown)","Red (Flame Master)","Blue (Water Master)","Yellow (Thunder)","Grey (Stone)","Green (Wind)","Pink / White (Love)","Purple (Mist)","Indigo-Grey (Beast)","Orange (Flame Offshoot)","Dual Blades","Hammer Blade (Unique)"] },
+      { id:"mark",     icon:"🔰",  name:"Slayer Mark",      options:["Awakened Slayer Mark","Transparent World","Selfless State","Red Blade Technique","Crimson Eyes","No Mark (Standard)","Partial Mark","Posthumous Mark","Blood Absorption","Wisteria Technique"] },
+      { id:"rival",    icon:"👹",  name:"Demon Rival",      options:["Muzan Kibutsuji","Kokushibo (Upper 1)","Doma (Upper 2)","Akaza (Upper 3)","Hantengu (Upper 4)","Gyokko (Upper 5)","Daki & Gyutaro (Upper 6)","Rui (Lower 5)","Enmu (Lower 1)","Random Demon","No Rival"] },
+      { id:"origin",   icon:"💔",  name:"Backstory",        options:["Family Slaughtered","Sibling Turned Demon","Alone Since Childhood","Wisteria Heritage","Samurai Legacy","Ordinary Pre-Tragedy","Former Demon (Human Again)","Lost Memories","Noble Family Debt","No Tragic Past"] },
+      { id:"style",    icon:"⚡",  name:"Battle Style",     options:["Speed (Flash Attacks)","Strength (Power Tank)","Technical Precision","Unconventional Chaos","Defensive Counter","Dual Weapon","Poison / Trap","Rhythm Combat","Berserker","Endurance","Formation Leader","Feint / Mind Games"] },
+      { id:"persona",  icon:"🧠",  name:"Personality",      options:["Gentle Protector","Furious Avenger","Stoic Code","Bubbly Eccentric","Cold Professional","Demon Compassion","Suicidal Bravery","Cheerful Despite Pain","Strict Disciplinarian","Haunted by Past","Absolute Resolve"] }
+    ]
+  },
+  jjk: {
+    name:"Jujutsu Kaisen", emoji:"🩸", color:"#6C63FF", color2:"#E63946",
+    tagline:"You will die surrounded by friends.",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Curse Spirit (Genderless)","Transfigured Human"] },
+      { id:"grade",    icon:"📊",  name:"Sorcerer Grade",   options:["Grade 4 (Lowest)","Grade 3","Semi-Grade 2","Grade 2","Semi-Grade 1","Grade 1","Special Grade","Cursed Object Grade","Curse Spirit Grade 1","Curse Spirit Special Grade","Non-Sorcerer","Culling Game Player"] },
+      { id:"tech",     icon:"👁",  name:"Cursed Technique", options:["Infinity (Limitless)","Black Flash Specialist","Divergent Fist","Straw Doll Technique","Boogie Woogie","Ratio Technique","Projection Sorcery","Reverse Cursed (Healing)","Binding Vow Combat","Puppet Manipulation","Ten Shadows","Flame Arrow","Blood Manipulation","No Technique (Raw CE)"] },
+      { id:"domain",   icon:"🌀",  name:"Domain Expansion", options:["Unlimited Void (Gojo)","Malevolent Shrine (Sukuna)","Coffin of Iron Mountain","Self-Embodiment of Perfection","Chimera Shadow Garden","Horizons of Captivating Skandha","Time Cell Moon Palace","No Domain","Incomplete Domain","Domain Amplification Counter","Anti-Domain Technique"] },
+      { id:"school",   icon:"🏫",  name:"Affiliation",      options:["Tokyo Jujutsu High","Kyoto Jujutsu High","Zen'in Clan","Gojo Clan","Kamo Clan","Geto's Curse Group","Culling Game","Ancient Era (Heian)","Jujutsu HQ","Sorcerer Killer Path","Death Painting","Rogue Sorcerer"] },
+      { id:"tool",     icon:"🗡",  name:"Cursed Tool",      options:["Inverted Spear of Heaven","Black Rope","Playful Cloud (Mace)","Split Soul Katana","Slaughter Demon Sword","Minimum Binding Vow Weapon","Cursed Womb (Living)","No Cursed Tool","Dual Blunt Weapons","Cursed Arrow & Bow","Cursed Staff","Straw Voodoo"] },
+      { id:"energy",   icon:"💀",  name:"CE Type",          options:["Standard Cursed Energy","Reverse CE (Healing)","Six Eyes (God Perception)","Black Flash Attuned","Incarnated Soul Energy","Death Painting Hybrid","Binding Vow Amplified","Idle Transfiguration","Pure Curse Essence","Heavenly Restriction (Body)"] },
+      { id:"persona",  icon:"🧠",  name:"Personality",      options:["Carefree Overpowered","Dark Brooding Avenger","Warm Protective","Reckless But Pure","Nihilistic Philosopher","Cold Calculated Killer","Gentle Until Provoked","Morally Grey Pragmatist","Cheerful Death-Acceptor","Trauma Locked","Overly Enthusiastic","Curse Sympathizer"] },
+      { id:"fate",     icon:"💔",  name:"Fate",             options:["Dies Protecting Others","Survives Culling Game","Becomes a Curse","Merges with Ancient","Sacrificed in Domain","Betrayed and Cursed","Escapes Sorcerer World","Impossible Victory","Black Flash Madness","Memory Consumed","Final Battle Unknown","Seals Self to Save"] }
+    ]
+  },
+  mha: {
+    name:"My Hero Academia", emoji:"💥", color:"#00B4D8", color2:"#FFD700",
+    tagline:"Go beyond! Plus Ultra!",
+    attrs: [
+      { id:"gender",   icon:"⚧",  name:"Gender",           options:["Male","Female","Non-Binary","Intersex / Quirk-Modified","Robot / AI Hero"] },
+      { id:"side",     icon:"🆚",  name:"Hero or Villain?", options:["Pro Hero (Licensed)","UA Student Hero","Vigilante (Unlicensed)","Villain (League)","Neutral Mercenary","Former Hero Gone Villain","Redeemed Villain","Nomu / Experiment","Commission Agent","Symbol of Hope Successor","Underground Hero (Anon)"] },
+      { id:"qtype",    icon:"⚡",  name:"Quirk Type",       options:["Emitter","Transformation","Mutant (Permanent)","Combination (Dual)","Storage / Stockpile","Accumulation","Healing / Medical","Mental / Psychic","Elemental Control","Quirk Stealing","Quirk Erasing","Quirkless (OFA Potential)","Multi-Quirk"] },
+      { id:"quirk",    icon:"💥",  name:"Quirk Power",      options:["One For All (Legacy)","Explosion (Nitro Sweat)","Half-Cold Half-Hot","Frog-Type Body","Gravity Manipulation","Zero Gravity (Float)","Engine (Leg Rockets)","Earphone Jack (Sonic)","Invisibility","Dark Shadow Creature","Super Regeneration","Decay (Touch Crumble)","Black Whip","Overhaul (Disassemble)","Hellflame","Hardening"] },
+      { id:"move1",    icon:"1️⃣",  name:"Basic Move",       options:["Detroit Smash","Stun Grenade","Ice Wall","Frog Kick","Suppression Bullets","Zero-Gravity Orbs","Engine Boost Rush","Heartbeat Distortion","Invisible Rush","Dark Shadow Claw","Regeneration Burst","Touching Crumble"] },
+      { id:"move2",    icon:"2️⃣",  name:"Named Super Move", options:["Texas Smash","Howitzer Impact","Heaven-Piercing Ice Wall","Froppy Camouflage","Black Hole (Gravity)","Shoto: Glacierize","Recipro Burst","4% Detroit Smash","Red Riot Unbreakable","Jet-Black Lightning","AP Shot (Uraraka)","Gigantification"] },
+      { id:"rank",     icon:"🏆",  name:"Hero Ranking",     options:["Unranked (Student)","Top 500","Top 100","Top 50","Top 10","Top 5","Number 3 Rising Star","Number 2 Symbol of Power","Number 1 Symbol of Peace","World's Best Hero","Underground No.1","Villain Boss Level"] },
+      { id:"agency",   icon:"🏢",  name:"Agency / Class",   options:["Class 1-A UA","Class 1-B UA","Endeavor Agency","Hawks Agency","Best Jeanist Studio","Nighteye Agency","Fatgum Agency","Mirko Solo","Gran Torino Underground","League of Villains","Paranormal Liberation","Commission Black Ops"] },
+      { id:"costume",  icon:"🦸",  name:"Costume Feature",  options:["Full Body Armour","Cape + Mask","Casual Street Hero","Gadget-Heavy Suit","Stealth Dark Colors","Bright Iconic Colors","Animal / Beast Theme","Fire / Ice Proof","Sound-Dampening Gear","Minimalist (Trust Quirk)","Injury-Compensating","Heavy Artillery Suit"] },
+      { id:"persona",  icon:"🧠",  name:"Personality",      options:["Plus Ultra Idealist","Cold Pro Business","Loveable Hot-head","Calm Calculated","Reckless Body-First","Anxiety Perfectionist","Eccentric Fanboy","Arrogant Natural Talent","Quietly Determined","Dark Past Redemption","Cheerful Support","Villain Who Wants Change"] }
+    ]
+  }
+};
+
+/* ============================================================
+   RAINBOW COLORS (like the reference image)
+   ============================================================ */
+const RAINBOW = [
+  "#FF0000","#FF4500","#FF6600","#FF8C00","#FFA500","#FFD700",
+  "#FFFF00","#AADD00","#00CC00","#00BB55","#00AAAA","#0088FF",
+  "#0055FF","#4400CC","#7700BB","#AA00AA","#CC0077","#EE0044",
+  "#FF3366","#FF6699","#00CCFF","#33AAFF","#66FFCC","#AAFFAA",
+  "#FFDD55","#FF9944","#DD44FF","#FF44AA","#44DDFF","#88FF44",
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let selUni = "naruto";
+let selAttrIdx = 0;
+let results = {};
+let spinning = false;
+let currentRot = 0;
+let isCustomMode = false;
+let customOptions = [];
+let customName = "";
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  buildUniTabs();
+  loadUniverse("naruto");
+}
+
+/* ============================================================
+   UNI TABS
+   ============================================================ */
+function buildUniTabs() {
+  const bar = document.getElementById("uniBar");
+  bar.innerHTML = "";
+  Object.entries(UNIVERSES).forEach(([key, u]) => {
+    const btn = document.createElement("button");
+    btn.className = "uni-tab" + (key === selUni ? " active" : "");
+    btn.style.setProperty("--tab-col", u.color);
+    btn.innerHTML = `<span class="te">${u.emoji}</span><span>${u.name}</span>`;
+    btn.onclick = () => loadUniverse(key);
+    bar.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   LOAD UNIVERSE
+   ============================================================ */
+function loadUniverse(key) {
+  if (spinning) return;
+  selUni = key;
+  results = {};
+  currentRot = 0;
+  isCustomMode = false;
+  selAttrIdx = 0;
+
+  document.querySelectorAll(".uni-tab").forEach(b =>
+    b.classList.toggle("active", b.querySelector("span:last-child")?.textContent === UNIVERSES[key].name)
+  );
+  // actually match by key
+  document.querySelectorAll(".uni-tab").forEach((b, i) => {
+    const k = Object.keys(UNIVERSES)[i];
+    b.classList.toggle("active", k === key);
+  });
+
+  const uni = UNIVERSES[key];
+
+  // char card
+  document.getElementById("charAvi").textContent = uni.emoji;
+  document.getElementById("charAvi").className = "char-avi";
+  document.getElementById("charName").textContent = `New ${uni.name} OC`;
+  const badge = document.getElementById("charBadge");
+  badge.textContent = uni.emoji + " " + uni.name;
+  badge.style.background = uni.color + "22";
+  badge.style.color = uni.color;
+  badge.style.borderColor = uni.color;
+
+  document.getElementById("completeRibbon").className = "complete-ribbon";
+  updateProgress(0, uni.attrs.length);
+  buildAttrChips(key);
+  buildStatRows(key);
+  selectAttr(0);
+}
+
+/* ============================================================
+   ATTR CHIPS
+   ============================================================ */
+function buildAttrChips(key) {
+  const strip = document.getElementById("attrStrip");
+  strip.innerHTML = "";
+  UNIVERSES[key].attrs.forEach((attr, i) => {
+    const chip = document.createElement("div");
+    chip.className = "attr-chip" + (i === 0 ? " active" : "");
+    chip.style.background = RAINBOW[i % RAINBOW.length] + "22";
+    chip.style.borderColor = RAINBOW[i % RAINBOW.length];
+    chip.style.color = RAINBOW[i % RAINBOW.length];
+    chip.id = `chip-${attr.id}`;
+    chip.innerHTML = `${attr.icon} ${attr.name}`;
+    chip.onclick = () => selectAttr(i);
+    strip.appendChild(chip);
+  });
+}
+
+function selectAttr(idx) {
+  if (spinning) return;
+  selAttrIdx = idx;
+  isCustomMode = false;
+  currentRot = 0;
+  const uni = UNIVERSES[selUni];
+  const attr = uni.attrs[idx];
+
+  document.querySelectorAll(".attr-chip").forEach((c, i) => {
+    c.classList.toggle("active", i === idx);
+  });
+
+  document.getElementById("wAttrIcon").textContent = attr.icon;
+  document.getElementById("wAttrName").textContent = attr.name.toUpperCase();
+  document.getElementById("wAttrSub").textContent = `${attr.options.length} options • Click wheel or SPIN button`;
+
+  const existing = results[attr.id];
+  if (existing) {
+    document.getElementById("resultVal").textContent = existing;
+    document.getElementById("resultVal").className = "result-value";
+    document.getElementById("resultEmoji").textContent = attr.icon;
+  } else {
+    document.getElementById("resultVal").textContent = "Spin the wheel to reveal!";
+    document.getElementById("resultVal").className = "result-value pending";
+    document.getElementById("resultEmoji").textContent = "";
+  }
+
+  drawWheel(attr.options, 0);
+}
+
+/* ============================================================
+   DRAW WHEEL — Big colorful like the reference image
+   ============================================================ */
+function drawWheel(options, rotation) {
+  const canvas = document.getElementById("mainWheel");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const outerR = cx - 4;
+  const innerTextR = outerR * 0.62;
+  const count = options.length;
+  const slice = (2 * Math.PI) / count;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // outer shadow ring
+  ctx.save();
+  ctx.shadowBlur = 40;
+  ctx.shadowColor = "rgba(0,0,0,0.9)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR + 2, 0, Math.PI * 2);
+  ctx.fillStyle = "#050810";
+  ctx.fill();
+  ctx.restore();
+
+  // Draw slices
+  for (let i = 0; i < count; i++) {
+    const startA = i * slice - Math.PI / 2 + rotation;
+    const endA = startA + slice;
+    const col = RAINBOW[i % RAINBOW.length];
+
+    // Main colored slice
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, startA, endA);
+    ctx.closePath();
+    ctx.fillStyle = col + "CC";
+    ctx.fill();
+
+    // Lighter outer strip (like reference image's vibrant outer edge)
+    ctx.beginPath();
+    ctx.moveTo(cx + (outerR - 28) * Math.cos(startA), cy + (outerR - 28) * Math.sin(startA));
+    ctx.arc(cx, cy, outerR, startA, endA);
+    ctx.arc(cx, cy, outerR - 28, endA, startA, true);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+
+    // Slice separator
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + outerR * Math.cos(startA), cy + outerR * Math.sin(startA));
+    ctx.strokeStyle = "rgba(0,0,0,0.35)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // TEXT — along the slice, reading outward
+    const midA = startA + slice / 2;
+    const textDist = outerR * 0.72;
+
+    ctx.save();
+    ctx.translate(cx + textDist * Math.cos(midA), cy + textDist * Math.sin(midA));
+    ctx.rotate(midA + Math.PI / 2); // rotate to read outward from center
+
+    const raw = options[i];
+    // shorten: remove parentheticals if too long
+    let label = raw.replace(/\s*\(.*?\)\s*/g, "").trim();
+    if (label.length > 16) label = label.slice(0, 15) + "…";
+
+    const fontSize = count <= 8 ? 13 : count <= 12 ? 11 : count <= 16 ? 10 : 9;
+    ctx.font = `900 ${fontSize}px "Nunito", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Shadow for readability
+    ctx.shadowBlur = 4;
+    ctx.shadowColor = "rgba(0,0,0,0.9)";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+  }
+
+  // Rim ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR - 28, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(0,0,0,0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Center hub — black circle where the SPIN button sits
+  const hubR = 52;
+  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, hubR);
+  hubGrad.addColorStop(0, "#1e2230");
+  hubGrad.addColorStop(1, "#080c16");
+  ctx.beginPath();
+  ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+  ctx.fillStyle = hubGrad;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+}
+
+/* ============================================================
+   SPIN
+   ============================================================ */
+function spinCurrentWheel() {
+  if (spinning) return;
+
+  let options, attrId, attrIcon;
+  if (isCustomMode) {
+    options = customOptions;
+    attrId = "__custom__";
+    attrIcon = "🎨";
+  } else {
+    const uni = UNIVERSES[selUni];
+    const attr = uni.attrs[selAttrIdx];
+    options = attr.options;
+    attrId = attr.id;
+    attrIcon = attr.icon;
+  }
+
+  if (!options || options.length < 2) return;
+
+  spinning = true;
+  const centerBtn = document.getElementById("centerBtn");
+  centerBtn.classList.add("spinning");
+  centerBtn.innerHTML = `<span class="spin-icon">⏳</span><span>...</span>`;
+  document.getElementById("spinAllBtn").disabled = true;
+
+  const count = options.length;
+  const slice = (2 * Math.PI) / count;
+  const pickedIdx = Math.floor(Math.random() * count);
+
+  // HOW THE WHEEL WORKS:
+  // drawWheel draws slice i starting at angle: i * slice - π/2 + rotation
+  // The pointer is at the very top = canvas angle -π/2
+  //
+  // For slice i to be centered under the pointer we need:
+  //   midAngle = i*slice - π/2 + rotation + slice/2  ==  -π/2
+  //   => rotation = -i*slice - slice/2
+  //   => rotation = -(i + 0.5) * slice
+  //
+  // We want to ARRIVE at that rotation after several full spins.
+  // Canvas arcs increase clockwise, so spinning forward = increasing rotation... 
+  // BUT we spin the wheel visually counter-clockwise (items come DOWN from top),
+  // meaning rotation DECREASES each frame.
+  // So we find the endRot by subtracting enough full turns plus the adjustment needed.
+
+  const targetRot = -(pickedIdx + 0.5) * slice; // exact center of picked slice under pointer
+  const fullSpins = (6 + Math.floor(Math.random() * 5)) * 2 * Math.PI; // 6-10 full spins
+
+  // Bring targetRot into same "direction" as currentRot (going negative / clockwise)
+  // Find how much we need to rotate from currentRot to reach targetRot (mod 2π),
+  // always going in the negative (clockwise) direction.
+  let adjustment = ((targetRot - currentRot) % (2 * Math.PI));
+  // Make sure adjustment is <= 0 (clockwise)
+  if (adjustment > 0) adjustment -= 2 * Math.PI;
+
+  const endRot = currentRot - fullSpins + adjustment;
+
+  const duration = 3500 + Math.random() * 1500;
+  const startTime = performance.now();
+  const startRot = currentRot;
+
+  function ease(t) { return 1 - Math.pow(1 - t, 4.5); }
+
+  function frame(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const r = startRot + (endRot - startRot) * ease(t);
+    drawWheel(options, r);
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      currentRot = endRot;
+      spinning = false;
+
+      // Read the result directly — we spun to exactly center pickedIdx under the pointer.
+      // Also verify by reverse-calculating: pointer at -π/2, slice i starts at i*slice - π/2 + rotation
+      // => angle under pointer relative to slice-space = (-π/2 - rotation + π/2) mod 2π = (-rotation) mod 2π
+      const norm = ((-currentRot) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const verifiedIdx = Math.floor(norm / slice) % count;
+      const picked = options[verifiedIdx];
+
+      if (!isCustomMode) {
+        results[attrId] = picked;
+        const uni = UNIVERSES[selUni];
+        updateStatRow(attrId, picked, selUni);
+        updateProgress(Object.keys(results).length, uni.attrs.length);
+        updateCharCard(selUni);
+
+        if (Object.keys(results).length === uni.attrs.length) {
+          triggerComplete(selUni);
+        }
+      }
+
+      // result toast
+      const rv = document.getElementById("resultVal");
+      rv.textContent = picked;
+      rv.className = "result-value";
+      document.getElementById("resultEmoji").textContent = attrIcon;
+
+      // animate result
+      rv.style.animation = "none";
+      setTimeout(() => rv.style.animation = "", 10);
+
+      centerBtn.classList.remove("spinning");
+      centerBtn.innerHTML = `<span class="spin-icon">🎡</span><span>SPIN</span>`;
+      document.getElementById("spinAllBtn").disabled = false;
+
+      // mark chip done
+      if (!isCustomMode) {
+        const chip = document.getElementById(`chip-${attrId}`);
+        if (chip) chip.style.opacity = "0.7";
+      }
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   SPIN ALL
+   ============================================================ */
+async function spinAllAttrs() {
+  if (spinning || isCustomMode) return;
+  const uni = UNIVERSES[selUni];
+  document.getElementById("spinAllBtn").disabled = true;
+
+  for (let i = 0; i < uni.attrs.length; i++) {
+    selectAttr(i);
+    await new Promise(resolve => {
+      setTimeout(() => {
+        spinCurrentWheel();
+        const poll = setInterval(() => {
+          if (!spinning) { clearInterval(poll); resolve(); }
+        }, 60);
+      }, 300);
+    });
+    await new Promise(r => setTimeout(r, 200));
+  }
+  document.getElementById("spinAllBtn").disabled = false;
+}
+
+/* ============================================================
+   CHAR CARD
+   ============================================================ */
+function updateCharCard(key) {
+  const uni = UNIVERSES[key];
+  const avi = document.getElementById("charAvi");
+  avi.textContent = uni.emoji;
+  avi.className = "char-avi lit";
+
+  let parts = [];
+  if (results.gender) parts.push(results.gender.split(" ")[0]);
+  if (results.rank || results.grade) parts.push((results.rank || results.grade).split(" ")[0]);
+  document.getElementById("charName").textContent =
+    (parts.length ? parts.join(" ") + " " : "") + uni.name + " OC";
+}
+
+/* ============================================================
+   STATS
+   ============================================================ */
+function buildStatRows(key) {
+  const uni = UNIVERSES[key];
+  const list = document.getElementById("statsList");
+  list.innerHTML = "";
+  uni.attrs.forEach(attr => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.id = `statrow-${attr.id}`;
+    row.innerHTML = `<span class="sk">${attr.icon} ${attr.name}</span><span class="sv pending" id="sv-${attr.id}">???</span>`;
+    list.appendChild(row);
+  });
+}
+
+function updateStatRow(attrId, value, key) {
+  const el = document.getElementById(`sv-${attrId}`);
+  if (!el) return;
+  // strip parenthetical for display
+  const short = value.replace(/\s*\(.*?\)\s*/g,"").trim();
+  el.textContent = short;
+  el.className = "sv filled";
+  el.style.color = UNIVERSES[key].color;
+
+  const row = document.getElementById(`statrow-${attrId}`);
+  if (row) { row.classList.add("active-row"); setTimeout(() => row.classList.remove("active-row"), 800); }
+}
+
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+function updateProgress(filled, total) {
+  const pct = total > 0 ? (filled / total) * 100 : 0;
+  document.getElementById("progFill").style.width = pct + "%";
+  document.getElementById("progNum").textContent = `${filled} / ${total}`;
+}
+
+/* ============================================================
+   COMPLETE
+   ============================================================ */
+function triggerComplete(key) {
+  const ribbon = document.getElementById("completeRibbon");
+  ribbon.className = "complete-ribbon show";
+  document.getElementById("charAvi").className = "char-avi done";
+  spawnConfetti(UNIVERSES[key].color);
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function spawnConfetti(baseCol) {
+  const cols = [baseCol,"#FFD700","#FF4655","#7c83ff","#00C9FF","#FF8C00","#00CC88"];
+  for (let i = 0; i < 100; i++) {
+    setTimeout(() => {
+      const p = document.createElement("div");
+      p.className = "confetti" + (Math.random() > 0.5 ? " circle" : "");
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.top = "-12px";
+      p.style.width = (5 + Math.random() * 8) + "px";
+      p.style.height = (5 + Math.random() * 8) + "px";
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.animationDuration = (1.5 + Math.random() * 2.5) + "s";
+      p.style.animationDelay = (Math.random() * 0.6) + "s";
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 4500);
+    }, i * 18);
+  }
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+function resetAll() {
+  if (spinning) return;
+  loadUniverse(selUni);
+}
+
+/* ============================================================
+   CUSTOM WHEEL MODAL
+   ============================================================ */
+function openCustomModal() {
+  document.getElementById("customModal").classList.add("open");
+  const list = document.getElementById("itemsList");
+  list.innerHTML = "";
+  // pre-fill a few blanks
+  for (let i = 0; i < 6; i++) addItemField();
+}
+
+function closeCustomModal() {
+  document.getElementById("customModal").classList.remove("open");
+}
+
+function addItemField(val = "") {
+  const list = document.getElementById("itemsList");
+  const row = document.createElement("div");
+  row.className = "item-row";
+  row.innerHTML = `
+    <input class="item-inp" placeholder="Option ${list.children.length + 1}..." value="${val}" />
+    <button class="btn-del-item" onclick="this.parentElement.remove()">✕</button>
+  `;
+  list.appendChild(row);
+}
+
+function launchCustomWheel() {
+  const name = document.getElementById("customName").value.trim() || "Custom Wheel";
+  const inputs = document.querySelectorAll(".item-inp");
+  const opts = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
+  if (opts.length < 2) { alert("Please add at least 2 options!"); return; }
+
+  customName = name;
+  customOptions = opts;
+  isCustomMode = true;
+  currentRot = 0;
+
+  document.getElementById("wAttrIcon").textContent = "🎨";
+  document.getElementById("wAttrName").textContent = name.toUpperCase();
+  document.getElementById("wAttrSub").textContent = `${opts.length} custom options • Click wheel or SPIN button`;
+  document.getElementById("resultVal").textContent = "Spin your custom wheel!";
+  document.getElementById("resultVal").className = "result-value pending";
+  document.getElementById("resultEmoji").textContent = "";
+
+  // deselect all chips
+  document.querySelectorAll(".attr-chip").forEach(c => c.classList.remove("active"));
+
+  drawWheel(opts, 0);
+  closeCustomModal();
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+init();
+</script>
+</body>
+</html>
